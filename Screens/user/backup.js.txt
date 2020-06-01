@@ -1,0 +1,656 @@
+import React, { useState, useEffect, useReducer, useCallback } from 'react';
+import {
+    View, Text, Image, StyleSheet, Alert, ActivityIndicator, Platform, TextInput, KeyboardAvoidingView,
+    TouchableWithoutFeedback, Keyboard, TouchableOpacity, LayoutAnimation, UIManager, ScrollView, Modal
+} from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from '../../RESPONSIVE'
+import CuisineButton from '../../Components/UI/cuisineButton';
+
+import { FontAwesome, AntDesign } from '@expo/vector-icons';
+import { useDispatch } from 'react-redux';
+
+import Color from '../../Constants/Colors';
+import Input from '../../Components/UI/Input';
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
+import Card from '../../Components/UI/Card';
+import Ingredients from '../../models/indgredient';
+import { FlatList } from 'react-native-gesture-handler';
+import * as mealActions from '../../store/actions/meal-action'
+
+if (
+    Platform.OS === "android" &&
+    UIManager.setLayoutAnimationEnabledExperimental
+) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+
+const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE';
+const AddIndgredient = 'AddIndgredient';
+const CHECKBOX_UPDATE = 'CHECKBOX_UPDATE';
+const AddStep = 'AddStep';
+const RESET = 'RESET';
+
+
+const initialState = {
+    input: {
+        title: '',
+        description: '',
+        indgredient: '',
+        value: '',
+        steps: ''
+
+    },
+    cuisine: {
+        Indian: false,
+        Italian: false,
+        Mexican: false,
+        Desert: false,
+    },
+    validities: {
+        title: false,
+        description: false
+
+    },
+    indgredientsArray: [],
+    steps: [],
+    formIsValid: false,
+    CuisineIsValid: false
+}
+
+const formReducer = (state, action) => {
+    switch (action.type) {
+        case FORM_INPUT_UPDATE:
+            {
+
+                const updatedInputValue = {
+                    ...state.input, [action.input]: action.value
+                }
+                const updatedFormValidities = {
+                    ...state.validities, [action.input]: action.isValid
+                }
+                let formisvalid = true;
+                for (const key in updatedFormValidities) {
+                    formisvalid = formisvalid && updatedFormValidities[key];
+                }
+
+                return {
+                    ...state,
+                    input: updatedInputValue,
+                    validities: updatedFormValidities,
+                    formIsValid: formisvalid
+                }
+            }
+        case AddIndgredient:
+            {
+
+                console.log('REDUCER ADDING');
+                const id1 = Math.random();
+                const newIndgredient = {
+                    id: id1,
+                    indgredient: state.input.indgredient,
+                    value: state.input.value
+                }
+                const arr = [];
+                let finalarr = [];
+                let oldInd = [];
+
+                // if (state.indgredientsArray) {
+                //     //   console.log('noooo');
+                //     //  console.log(state.indgredientsArray);
+                //     let array = state.indgredientsArray;
+                //     for (const key in array) {
+                //         oldInd.push({
+                //             id: array[key].id,
+                //             indgredient: array[key].indgredient,
+                //             value: array[key].value
+                //         })
+                //     }
+                //     oldInd.push(newIndgredient);
+                //     finalarr = oldInd;
+                // }
+                // else {
+                //     arr.push(newIndgredient);
+                //     finalarr = arr
+                // }
+                finalarr=[...state.indgredientsArray,newIndgredient]
+         //       console.log(finalarr+'kk');
+                let newInput= {...state.input,indgredient:'',value:''}
+                console.log(newInput);
+                return {
+                    ...state,
+                    indgredientsArray: finalarr,
+                    input:newInput
+                    
+                }
+            }
+        case AddStep:
+            {
+                console.log('REDUCER STEP');
+
+
+                const id1 = Math.random();
+                const newSteps = {
+                    id: id1,
+                    steps: state.input.steps
+                }
+                const arr = [];
+                let finalarr = [];
+                
+
+                // if (state.steps) {
+                //     //   console.log('noooo');
+                //     //  console.log(state.indgredientsArray);
+                //     let array = state.steps;
+                //     for (const key in array) {
+                //         oldsteps.push({
+                //             id: array[key].id,
+                //             steps: array[key].steps
+                //         })
+                //     }
+                //     oldsteps.push(newIndgredient);
+                //     finalarr = oldsteps;
+                // }
+                // else {
+                //     arr.push(newIndgredient);
+                //     finalarr = arr
+                // }
+                finalarr=[...state.steps,newSteps]
+                console.log(finalarr+'kk');
+                console.log(finalarr);
+                return {
+                    ...state,
+                    steps: finalarr
+                }
+
+            }
+        case CHECKBOX_UPDATE: {
+            if (action.input && (action.value || action.value === false)) {
+                const updatedInputValue = {
+                    ...state.cuisine, [action.input]: action.value
+                }
+                let formisvalid = false;
+                for (const key in updatedInputValue) {
+                    formisvalid = formisvalid || updatedInputValue[key];
+                    //  console.log(updatedInputValue[key],key);
+                }
+                //  console.log(formisvalid);
+
+                return {
+                    ...state,
+                    cuisine: updatedInputValue,
+                    CuisineIsValid: formisvalid
+                }
+            }
+        }
+        case RESET: {
+            return initialState;
+        }
+
+        default: return state
+    }
+};
+
+const AddRecipeScreen = props => {
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [indgredientModal, setIndgredientModal] = useState(false);
+    const [stepModal, setStepModal] = useState(false);
+    const [pickedImage, setPickedImage] = useState('');
+    const formDispatch = useDispatch();
+
+
+    //let [formState, dispatch];
+
+
+ 
+      let  [formState, dispatch] = useReducer(formReducer, initialState);
+       
+    
+
+
+    useEffect(() => {
+        //manageState
+        return () => {
+            console.log('bye');
+        }
+    }, [])
+
+
+
+
+
+
+    const inputChangeHandler = useCallback((id, value, isValid) => {
+        //   console.log('called by something');
+        dispatch(
+            {
+                type: FORM_INPUT_UPDATE,
+                input: id,
+                value: value,
+                isValid: isValid
+            }
+        );
+    },
+        [dispatch]);
+
+    const checkboxHandler = useCallback((id, value) => {
+        //  console.log('called by something');
+        dispatch(
+            {
+                type: CHECKBOX_UPDATE,
+                input: id,
+                value: value,
+            }
+        );
+    },
+        [dispatch]);
+
+
+    const indgredientHandler = () => {
+        //  console.log('innnn ');
+        if (formState.validities.indgredient && formState.validities.value && (formState.input.ingredient !== '') && (formState.input.value !== '')) {
+            dispatch(
+                {
+                    type: AddIndgredient,
+                    indgredient: formState.input.indgredient,
+                    value: formState.input.value,
+                    //     isValid: isValid
+                }
+            );
+        }
+        else {
+
+        }
+
+    }
+    const stepsHandler = () => {
+        //      console.log('heyy');
+        if (formState.validities.steps && (formState.input.steps !== '')) {
+            dispatch(
+                {
+                    type: AddStep,
+                    value: formState.input.steps,
+                    //     isValid: isValid
+                }
+            );
+        }
+        else {
+
+        }
+
+    };
+
+    const SAVEHANDLER = async () => {
+        setIsLoading(true);
+        await formDispatch(mealActions.createMeal(
+            pickedImage,
+            formState.input.title,
+            formState.input.description,
+            formState.indgredientsArray,
+            formState.steps,
+            formState.cuisine
+        ));
+        setIsLoading(false);
+        setPickedImage('');
+        dispatch({ type: RESET })
+        Alert.alert('Congrats', 'Your recipe is added', [{ text: 'Okay' }]);
+        props.navigation.navigate('Dashboard');
+    }
+
+    const verifyPermissions = async () => {
+
+        const result = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
+        if (result.status !== 'granted') {
+            Alert.alert('Insufficient permissions', 'You need to grant camera permission',
+                [{ text: 'Okay' }]
+            );
+            return false;
+        }
+        return true;
+    }
+    const takeImageHandler = async () => {
+        const hasPermission = await verifyPermissions();
+        if (!hasPermission) {
+            return;
+        }
+        const image = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            // aspect:[16,9],
+            quality: 0.1
+        });
+        setPickedImage(image.uri);
+        //   props.onImageTake(image.uri);
+    }
+
+
+
+
+    if (isLoading) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color={Color.primary} />
+            </View>
+        )
+    }
+    return (
+
+        <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: Color.dark }} >
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+            >
+                <View style={{ ...styles.modalView, position: 'absolute', bottom: 0, height: '75%', width: '100%', borderTopColor: Color.accent }}>
+                    <View style={{ ...styles.row, alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: '7%', paddingVertical: '2%' }}>
+                        <Text style={styles.text}>{indgredientModal ? 'Indgredient' : 'Steps'}</Text>
+
+                        <View>
+                            <TouchableOpacity
+                                style={{ ...styles.openButton }}
+                                onPress={() => {
+                                    setModalVisible(!modalVisible);
+                                    setIndgredientModal(false);
+                                    setStepModal(false);
+                                }}
+                            >
+                                <AntDesign name="closecircleo" size={hp('4%')} color={Color.accent} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View style={styles.center}>
+                        <View style={{ ...styles.hr, marginTop: '0%', backgroundColor: Color.primary, width: '94%' }} />
+                    </View>
+                    {indgredientModal && <FlatList
+                        data={formState.indgredientsArray}
+                        renderItem={(itemData) => {
+                            return (
+                                <>
+
+                                    <View style={styles.ingredientsteps}>
+                                        <Text style={styles.text} numberOfLines={1}>{itemData.item.indgredient}</Text>
+                                        <Text style={styles.text} numberOfLines={1}>{itemData.item.value}</Text>
+                                    </View>
+                                    <View style={styles.center}>
+                                        <View style={{ ...styles.hr, marginTop: '0%', backgroundColor: 'rgba(255, 255, 255 ,0.1)', width: '94%' }} />
+                                    </View>
+                                </>
+                            )
+                        }}
+                    />}
+                    {stepModal && <FlatList
+                        data={formState.steps}
+                        renderItem={(itemData) => {
+                            return (
+                                <>
+
+                                    <View style={styles.ingredientsteps}>
+                                        <Text style={styles.text} numberOfLines={1}>{itemData.item.steps}</Text>
+                                    </View>
+                                    <View style={styles.center}>
+                                        <View style={{ ...styles.hr, marginTop: '0%', backgroundColor: 'rgba(255, 255, 255 ,0.1)', width: '94%' }} />
+                                    </View>
+                                </>
+                            )
+                        }}
+                    />}
+
+
+                </View>
+            </Modal>
+
+
+            <View style={styles.center}>
+                <Text style={{ ...styles.text, marginVertical: hp('1%') }}>Add your recipe</Text>
+                <View style={styles.hr} />
+
+                <Card style={{ ...styles.CardLayout, height: hp('56%') }}>
+
+                    <TouchableOpacity style={{ ...styles.imagePicker }} onPress={takeImageHandler}>
+                        {pickedImage ?
+                            <Image style={styles.image}
+                                source={{ uri: pickedImage }}
+                            />
+                            :
+                            <>
+                                <AntDesign name="camera" size={hp('4%')} color={Color.accent} />
+                                <Text style={{ ...styles.text, fontSize: hp('3%') }}>Click an image</Text>
+                            </>
+                        }
+
+                    </TouchableOpacity>
+                    <Input
+                        id="title"
+                        // label="E-Mail"
+                        placeholder='Recipe Name'
+                        required
+
+                        autoCapitalize="none"
+                        errorText="Please enter a valid value"
+                        onInputChange={inputChangeHandler}
+                        initialValue={formState.input.title}
+                        style={styles.textInputs}
+                    />
+
+                    <Input
+                        id="description"
+                        // label="E-Mail"
+                        placeholder='Description'
+                        required
+                        multiline={true}
+                        autoCapitalize="none"
+                        errorText="Please enter a valid value"
+                        onInputChange={inputChangeHandler}
+                        initialValue={formState.input.description}
+                        style={{ ...styles.textInputs, height: hp('15%'), borderRadius: wp('3%'), borderWidth: 1 }}
+                    />
+                </Card>
+                <Card style={styles.CardLayout}>
+
+                    <Input
+                        id="indgredient"
+                        // label="E-Mail"
+                        placeholder='Indgredient'
+
+                        required
+
+                        autoCapitalize="none"
+                        errorText="Please enter a valid indgredient."
+                        onInputChange={inputChangeHandler}
+                        initialValue={formState.input.ingredient}
+                        style={{ ...styles.textInputs, }}
+                    />
+                    <Input
+                        id="value"
+                        // label="E-Mail"
+                        placeholder='Value'
+
+                        required
+
+                        autoCapitalize="none"
+                        errorText="Please enter a valid value"
+                        onInputChange={inputChangeHandler}
+                        initialValue={formState.input.value}
+                        style={{ ...styles.textInputs, }}
+                    />
+
+
+                    <View style={styles.row}>
+                        <TouchableOpacity style={styles.customButtom} onPress={() => {
+                            setModalVisible(!modalVisible)
+                            setIndgredientModal(true);
+
+                        }}>
+                            <Text style={styles.buttonText}>View</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.customButtom} onPress={indgredientHandler}>
+                            <Text style={styles.buttonText}>Add</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <Input
+                        id="steps"
+                        // label="E-Mail"
+                        placeholder='Steps'
+                        required
+                        autoCapitalize="none"
+                        multiline
+                        errorText="Please enter a valid value"
+                        onInputChange={inputChangeHandler}
+                        initialValue={formState.input.steps}
+                        style={{ ...styles.textInputs, height: hp('20%'), borderRadius: wp('3%'), borderWidth: 1, marginVertical: '4%' }}
+                    />
+                    <View style={{ ...styles.row }}>
+                        <TouchableOpacity style={styles.customButtom} onPress={() => {
+                            setModalVisible(!modalVisible)
+                            setStepModal(true);
+                        }}>
+                            <Text style={styles.buttonText}>View</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.customButtom} onPress={stepsHandler}>
+                            <Text style={styles.buttonText}>Add</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Card>
+                <Card style={{ ...styles.CardLayout, height: hp('27=5%') }}>
+                    <View style={{ marginLeft: wp('4%'), marginTop: hp('2%') }}>
+                        <Text style={{ color: Color.text, fontSize: hp('3%') }}>Select cuisuine</Text>
+                        <View style={{ ...styles.row, marginTop: hp('2%') }}>
+                            <CuisineButton name='Indian' value={false} handler={checkboxHandler} />
+                            <CuisineButton name='Italian' value={false} handler={checkboxHandler} />
+                        </View>
+                        <View style={{ ...styles.row, marginVertical: hp('2%') }}>
+                            <CuisineButton name='Mexican' value={false} handler={checkboxHandler} />
+                            <CuisineButton name='Desert' value={false} handler={checkboxHandler} />
+                        </View>
+                    </View>
+                </Card>
+                <View style={{ ...styles.center, width: '100%', paddingBottom: hp('4%') }}>
+                    <TouchableOpacity style={{ height: hp('7%'), width: '90%', backgroundColor: Color.lgdark, justifyContent: 'center', alignItems: 'center', borderRadius: wp('4%'), marginVertical: hp('1%') }}
+                        onPress={SAVEHANDLER}
+                    >
+                        <Text style={{ color: Color.primary, fontSize: hp('3%'), }}>Save Recipe</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+
+
+
+
+        </ScrollView >
+
+    );
+}
+
+const styles = StyleSheet.create({
+    center: {
+        //   justifyContent: 'center',
+        alignItems: 'center',
+        //   marginTop: '5%',
+    },
+    centered: {
+        flex: 1,
+        backgroundColor: Color.dark,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    text: {
+        color: Color.text,
+        fontSize: hp('4%'),
+        //  marginVertical: hp('1%')
+    },
+    hr: {
+        height: 3,
+        backgroundColor: Color.accent,
+        marginTop: '2%',
+        //    alignSelf: 'stretch',
+        width: '70%'
+    },
+    textInputs: {
+        width: wp('80%'),
+        //  marginVertical: hp('3%'),
+        marginHorizontal: wp('4%'),
+        borderColor: Color.text
+    },
+    card: {
+        width: wp('90%'),
+        height: hp('135%'),
+        //   height: hp('40%'),
+        backgroundColor: Color.lgdark,
+        borderRadius: wp('4%'),
+        // padding: 10,
+        marginVertical: hp('3%')
+        , overflow: 'hidden'
+        //   justifyContent: 'center'
+    },
+    imagePicker: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '40%',
+        borderWidth: 1,
+        borderBottomColor: Color.text2
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%'
+    },
+    customButtom: {
+        height: hp('6%'),
+        width: '40%',
+        backgroundColor: Color.dark,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: wp('4%')
+    },
+    buttonText: {
+        color: Color.primary,
+        fontSize: hp('3%'),
+        marginVertical: hp('1%')
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+    },
+    modalView: {
+        //   margin: 20,
+        backgroundColor: '#403f3f',
+        borderTopColor: Color.accent,
+        borderRadius: 20,
+        //  padding: 35,
+        //   alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+
+        //  alignItems: 'flex-end'
+    },
+    CardLayout: {
+        width: wp('90%'),
+        height: hp('66%'),
+        backgroundColor: Color.lgdark,
+        borderRadius: wp('4%'),
+        //   padding: 10,
+        marginVertical: hp('2%'),
+        overflow: 'hidden',
+        //s justifyContent: 'center'
+    },
+    ingredientsteps: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: wp('3%')
+    }
+
+});
+
+
+export default AddRecipeScreen;
