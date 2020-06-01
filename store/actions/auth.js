@@ -1,24 +1,11 @@
 import { AsyncStorage } from 'react-native';
 
-// export const SIGNUP = 'SIGNUP';
-// export const LOGIN = 'LOGIN';
 export const AUTHENTICATE = 'AUTHENTICATE';
 export const LOGOUT = 'LOGOUT';
-// import firebase from '../../config';
+
 import firebase from 'firebase';
 import * as Google from 'expo-google-app-auth';
 
-// const firebaseConfig = {
-//   apiKey: "AIzaSyD682v8FH_hBEtPYAM7hHrja-5xHa1hF44",
-//   authDomain: "recipe-292c7.firebaseapp.com",
-//   databaseURL: "https://recipe-292c7.firebaseio.com",
-//   projectId: "recipe-292c7",
-//   storageBucket: "recipe-292c7.appspot.com",
-//   messagingSenderId: "802451063029",
-//   appId: "1:802451063029:web:51cbae1c36b2c9cf31c5bc",
-//   measurementId: "G-YTRVFJJSCV"
-// };
-// FIREBASE.initializeApp(firebaseConfig);
 
 
 export const authenticate = (userId, token) => {
@@ -266,9 +253,9 @@ export const signInWithGoogleAsync = () => {
    //   console.log('fmfkm')
       const result = await Google.logInAsync({
 
-        androidClientId: '802451063029-vo3qj1e5ba66stobdtdaspje8rmljoaa.apps.googleusercontent.com',
+        androidClientId: //YOUR ANDROID KEY,
         behavior: 'web',
-        iosClientId: '802451063029-ml8ug5nt16ea7oeja8ckpmfckf09qcpq.apps.googleusercontent.com',
+        iosClientId: //YOUR IOS KEY,
         scopes: ['profile', 'email']
       });
 
