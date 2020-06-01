@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "temp",
+    "slug": "temp",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+
+    "ios": {
+      "bundleIdentifier": "com.adityapahilwani",
+      "buildNumber": "1.0.0",
+      "supportsTablet": true,
+      "config": {
+        "googleSignIn": {
+          
+          "reservedClientId": "com.googleusercontent.apps.802451063029-9ascbj4cehaft1ar3tch6c8fseubeuu3"
+        }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "android": {
+      "package": "com.adityapahilwani",
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 1
+    }
+  }
+}
