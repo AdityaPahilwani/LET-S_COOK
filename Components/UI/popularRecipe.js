@@ -22,11 +22,7 @@ const PopularRecipe = props => {
                             {props.name}
                         </Text>
                     </TouchableOpacity>
-                    <View style={{ ...styles.rightBar, padding: 10 }}>
-                        <TouchableOpacity style={styles.roundButton} onPress={() => { }}>
-                            <MaterialIcons name="favorite-border" size={hp('3%')} color="#f85959" />
-                        </TouchableOpacity>
-                    </View>
+                   
                 </View>
                 <View style={styles.Image}>
                     <Image style={{ height: '100%', width: '100%' }}

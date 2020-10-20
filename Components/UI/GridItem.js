@@ -27,12 +27,7 @@ const RenderGridItem = (props) => {
       <Card style={styles.cardStyle}>
         <View style={styles.topBar}>
           <View style={{ ...styles.rightBar, marginTop: "5%", padding: 10 }}>
-            <TouchableOpacity
-              style={{ ...styles.roundButton }}
-              onPress={() => {}}
-            >
-              <MaterialIcons name="favorite-border" size={23} color="#f85959" />
-            </TouchableOpacity>
+           
           </View>
         </View>
 
@@ -42,15 +37,15 @@ const RenderGridItem = (props) => {
             style={{ height: "100%", width: "100%" }}
           />
         </View>
-        <View style={{paddingLeft:10,paddingTop:3}}>
+        <View style={{ paddingLeft: 10, paddingTop: 3 }}>
           <Text
-            style={{ ...styles.text, fontSize: hp("2.3%"), width: "80%" }}
+            style={{ ...styles.text, fontSize: hp("2.5%"), width: "100%" }}
             numberOfLines={2}
           >
             {title}
           </Text>
           <Text
-            style={{ ...styles.text, fontSize: hp("1.7%"), width: "80%" }}
+            style={{ ...styles.text, fontSize: hp("2%"), width: "100%" }}
             numberOfLines={1}
           >
             ~{USER_NAME}
@@ -63,7 +58,7 @@ const RenderGridItem = (props) => {
 
 const styles = StyleSheet.create({
   cardStyle: {
-    height: hp("40%"),
+    height: hp("45%"),
     width: wp("95%") / 2,
     backgroundColor: Color.accent,
     backgroundColor: Color.lgdark,
@@ -113,7 +108,7 @@ const styles = StyleSheet.create({
     // marginTop: hp('1%'),
     marginLeft: "3%",
     overflow: "hidden",
-  }
+  },
 });
 
 export default RenderGridItem;

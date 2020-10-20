@@ -1,18 +1,24 @@
-import { AUTHENTICATE, LOGOUT } from '../actions/auth';
+import { AUTHENTICATE, LOGOUT } from "../actions/auth";
 
 const initialState = {
- // token: null,
-  userId: null
+  // token: null,
+  userId: null,
+  firstName: null,
+  lastName: null,
+  profilePic: null,
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    
     case AUTHENTICATE:
-      console.log('heyy yo reduer here ' +action.userId);
+   //   console.log(action.userId,action.firstName,action.lastName,action.profilePic);
+   console.log(action.firstName,action.profilePic,action.firstName,action.lastName);
       return {
-     //   token: action.token,
-        userId: action.userId
+        //   token: action.token,
+        userId: action.userId,
+        firstName: action.firstName,
+        lastName: action.lastName,
+        profilePic: action.profilePic,
       };
     case LOGOUT:
       return initialState;
@@ -25,4 +31,3 @@ export default (state = initialState, action) => {
       return state;
   }
 };
-

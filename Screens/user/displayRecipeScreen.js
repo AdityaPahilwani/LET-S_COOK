@@ -17,11 +17,11 @@ import Color from "../../Constants/Colors";
 import { Ionicons, AntDesign, MaterialIcons } from "@expo/vector-icons";
 
 import Card from "../../Components/UI/Card";
-import RenderGridItem from '../../Components/UI/GridItem';
+import RenderGridItem from "../../Components/UI/GridItem";
 import { useSelector, useDispatch } from "react-redux";
 import * as mealActions from "../../store/actions/meal-action";
-import { Header, HeaderTitle } from "react-navigation-stack";
 
+import firebase from 'firebase';
 const NUM_COLUMN = 2;
 
 const DisplayRecipeScreen = (props) => {
@@ -43,7 +43,7 @@ const DisplayRecipeScreen = (props) => {
   }
 
   if (cuisine !== "All") {
-    console.log("in filtering");
+//    console.log("in filtering");
     displayMeals = displayMeals.filter(
       (meal) => meal["categoryIds"][cuisine] === true
     );
@@ -53,15 +53,36 @@ const DisplayRecipeScreen = (props) => {
     fetch();
   }, []);
 
-  const fetch = async () => {};
-  const {navigation}=props;
+  const fetch = async () => {
+    // var num=0;
+    // var ref = firebase.database().ref("Meals/");
+
+    // ref.orderByChild("cuisine/Indian")
+    //   .equalTo(true)
+    //   .on("child_added", function (snapshot) {
+    //     console.log(snapshot.key);
+    //     console.log(num);
+    //     num++;
+    //   });
+    await dispatch(mealActions.fetchUserMeal());
+     
+  };
+
+
+  const { navigation } = props;
   const renderGridItem = (itemData) => {
-     console.log(itemData.item.title)
+    //   console.log(itemData.item.title)
+  //  console.log(itemData.item.USER_NAME);
     return (
-      <RenderGridItem id={itemData.item.id} imageUrl={itemData.item.imageUrl} title={itemData.item.title} USER_NAME={itemData.item.USER_NAME}
-      NUM_COLUMN={NUM_COLUMN}
-      navigation={navigation} />
-      );
+      <RenderGridItem
+        id={itemData.item.id}
+        imageUrl={itemData.item.imageUrl}
+        title={itemData.item.title}
+        USER_NAME={itemData.item.USER_NAME}
+        NUM_COLUMN={NUM_COLUMN}
+        navigation={navigation}
+      />
+    );
   };
 
   if (isLoading) {
@@ -86,7 +107,7 @@ const DisplayRecipeScreen = (props) => {
         <View style={{ marginTop: hp("4%"), flex: 1 }}>
           <FlatList
             numColumns={NUM_COLUMN}
-            data={displayMeals}
+            data={displayMeals.reverse()}
             renderItem={renderGridItem}
           />
         </View>
@@ -99,15 +120,16 @@ DisplayRecipeScreen.navigationOptions = (navigationData) => {
   return {
     headerTransparent: "true",
     headerLeft: (
-
-        <TouchableOpacity style={{ ...styles.roundButton, marginLeft: hp('3%'), }} onPress={() => {
-            navigationData.navigation.goBack();
-            console.log('rtbb')
-        }}>
-            <AntDesign name="back" size={hp('4%')} color='#12e2a3' />
-        </TouchableOpacity>
-
-    )
+      <TouchableOpacity
+        style={{ ...styles.roundButton, marginLeft: hp("3%") }}
+        onPress={() => {
+          navigationData.navigation.goBack();
+          console.log("rtbb");
+        }}
+      >
+        <AntDesign name="back" size={hp("4%")} color="#12e2a3" />
+      </TouchableOpacity>
+    ),
   };
 };
 

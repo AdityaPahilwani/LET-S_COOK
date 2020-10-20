@@ -11,6 +11,7 @@ import {
   Animated,
   FlatList,
   ActivityIndicator,
+  AsyncStorage,
 } from "react-native";
 import Color from "../../Constants/Colors";
 import {
@@ -27,7 +28,10 @@ import { useSelector, useDispatch } from "react-redux";
 const DashboardScreen = (props) => {
   const dispatch = useDispatch();
   let POPULAR = useSelector((state) => state.meal.popularMeals);
+  let name = useSelector((state) => state.auth.firstName);
   const [isLoading, setIsLoading] = useState(false);
+
+  // const [name,setName]=useState('');
   // useEffect(() => {
   //     console.log('hey');
   //     fetch();
@@ -35,9 +39,13 @@ const DashboardScreen = (props) => {
 
   const loadMeals = useCallback(async () => {
     //  setError(null);
+    console.log("worskkk");
     try {
       await dispatch(mealActions.fetchMeal());
-    } catch (err) {}
+      
+    } catch (err) {
+      console.log(err);
+    }
   }, [dispatch, setIsLoading]);
 
   useEffect(() => {
@@ -48,7 +56,8 @@ const DashboardScreen = (props) => {
     // console.log(POPULAR.length+'aditya');
   }, [dispatch, loadMeals]);
 
-  if (POPULAR.length === 0 || isLoading) {
+  if (isLoading || POPULAR.length === 0) {
+    console.log(name+'gaandu');
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={Color.primary} />
@@ -76,7 +85,7 @@ const DashboardScreen = (props) => {
         }}
       >
         <Text style={{ ...styles.text, fontSize: hp("4%") }} numberOfLines={1}>
-          Hey Aditya,
+          Hey {name},
         </Text>
         <Text style={{ ...styles.text, fontSize: hp("3%") }} numberOfLines={2}>
           what do you want to eat today?
@@ -84,6 +93,7 @@ const DashboardScreen = (props) => {
       </View>
       <ScrollView
         horizontal={true}
+      
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ marginTop: "1%" }}
       >

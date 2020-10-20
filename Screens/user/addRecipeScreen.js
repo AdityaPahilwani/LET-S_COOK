@@ -111,13 +111,13 @@ const AddRecipeScreen = (props) => {
   };
 
   const SAVEHANDLER = async () => {
-    
+  
     if (
       pickedImage &&
       title &&
       description &&
-      indgredientsArray &&
-      steps &&
+      (indgredientsArray.length !== 0) &&
+      (steps.length !== 0) &&
       (indian || italian || mexican || desert)
     ) {
       const cuisine = {
@@ -138,14 +138,14 @@ const AddRecipeScreen = (props) => {
           steps,
           cuisine
         )
-      );
+       );
       
       Alert.alert("Congrats", "Your recipe is added", [{ text: "Okay" }]);
-      
+      clearData();
     } else {
       setError("Please Fill all Details");
     }
-    clearData();
+    
   };
 
   const verifyPermissions = async () => {

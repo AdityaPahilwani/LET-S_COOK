@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "temp",
-    "slug": "temp",
+    "name": "Recipe",
+    "slug": "Recipe",
     "platforms": [
       "ios",
       "android",
@@ -29,7 +29,7 @@
       "config": {
         "googleSignIn": {
           
-          "reservedClientId": "com.googleusercontent.apps.802451063029-9ascbj4cehaft1ar3tch6c8fseubeuu3"
+          "reservedClientId": "//your oauth id"
         }
       },
       "googleServicesFile": "./GoogleService-Info.plist"

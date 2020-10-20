@@ -1,16 +1,34 @@
 import { AsyncStorage } from 'react-native';
 
+// export const SIGNUP = 'SIGNUP';
+// export const LOGIN = 'LOGIN';
 export const AUTHENTICATE = 'AUTHENTICATE';
 export const LOGOUT = 'LOGOUT';
-
+// import firebase from '../../config';
 import firebase from 'firebase';
 import * as Google from 'expo-google-app-auth';
 
+// const firebaseConfig = {
+//   apiKey: "AIzaSyD682v8FH_hBEtPYAM7hHrja-5xHa1hF44",
+//   authDomain: "recipe-292c7.firebaseapp.com",
+//   databaseURL: "https://recipe-292c7.firebaseio.com",
+//   projectId: "recipe-292c7",
+//   storageBucket: "recipe-292c7.appspot.com",
+//   messagingSenderId: "802451063029",
+//   appId: "1:802451063029:web:51cbae1c36b2c9cf31c5bc",
+//   measurementId: "G-YTRVFJJSCV"
+// };
+// FIREBASE.initializeApp(firebaseConfig);
 
 
-export const authenticate = (userId, token) => {
+export const authenticate = (userId, firstName,lastName,profilePic) => {
   return dispatch => {
-    dispatch({ type: AUTHENTICATE, userId: userId });
+    dispatch({ type: AUTHENTICATE, 
+      userId: userId,
+      firstName:firstName,
+      lastName:lastName,
+      profilePic:profilePic 
+    });
   };
 };
 
@@ -112,11 +130,14 @@ export const login = (email, password) => {
   }
 };
 
-const saveDataToStorage = async (userId) => {
+const saveDataToStorage = async (userId,firstName,lastName,profilePic) => {
   AsyncStorage.setItem(
     'userData',
     JSON.stringify({
-      userId: userId
+      userId: userId,
+      firstName:firstName,
+      lastName:lastName,
+      profilePic:profilePic
     })
   );
 };
@@ -160,8 +181,8 @@ const isUserEqual = (googleUser, firebaseUser) => {
     for (var i = 0; i < providerData.length; i++) {
       if (
         providerData[i].providerId ===
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
-        providerData[i].uid === googleUser.getBasicProfile().getId()
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID 
+      //  && providerData[i].uid === googleUser.getBasicProfile().getId()
       ) {
         // We don't need to reauth the Firebase connection.
         return true;
@@ -181,7 +202,7 @@ export const onSignIn = googleUser => {
       function (firebaseUser) {
         unsubscribe();
         // Check if we are already signed-in Firebase with the correct user.
-        if (!isUserEqual(googleUser, firebaseUser)) {
+       // if (!isUserEqual(googleUser, firebaseUser)) {
           // Build Firebase credential with the Google ID token.
         //  console.log(googleUser.idToken,
        //     googleUser.accessToken);
@@ -196,7 +217,7 @@ export const onSignIn = googleUser => {
             .signInAndRetrieveDataWithCredential(credential)
             .then(function (result) {
               console.log('user signed in ');
-              saveDataToStorage(result.user.uid)
+            //  saveDataToStorage(result.user.uid)
 
               if (result.additionalUserInfo.isNewUser) {
                 firebase
@@ -207,6 +228,7 @@ export const onSignIn = googleUser => {
                     profile_picture: result.additionalUserInfo.profile.picture,
                     firstName: result.additionalUserInfo.profile.given_name,
                     lastName: result.additionalUserInfo.profile.family_name,
+                    name: result.additionalUserInfo.profile.given_name + result.additionalUserInfo.profile.family_name,
                     created_at: Date.now()
                   })
                   .then(function (snapshot) {
@@ -220,8 +242,17 @@ export const onSignIn = googleUser => {
                     last_logged_in: Date.now()
                   });
               }
-              saveDataToStorage(result.user.uid)
-              dispatch(authenticate(result.user.uid));
+              saveDataToStorage(result.user.uid,
+                result.additionalUserInfo.profile.given_name,
+                result.additionalUserInfo.profile.family_name,
+                result.additionalUserInfo.profile.picture);
+             
+              
+               
+              dispatch(authenticate(result.user.uid,
+                result.additionalUserInfo.profile.given_name,
+                result.additionalUserInfo.profile.family_name,
+                result.additionalUserInfo.profile.picture));
             })
             .catch(function (error) {
               // Handle Errors here.
@@ -233,11 +264,12 @@ export const onSignIn = googleUser => {
                 throw new Error('Already used')
               }
               var credential = error.credential;
+              throw new error;
               console.log(error);
             });
-        } else {
-          console.log('User already signed-in Firebase.');
-        }
+        // } else {
+        //   console.log('User already signed-in Firebase.');
+        // }
     //    console.log('k')
       }
     );
@@ -253,9 +285,9 @@ export const signInWithGoogleAsync = () => {
    //   console.log('fmfkm')
       const result = await Google.logInAsync({
 
-        androidClientId: //YOUR ANDROID KEY,
+        androidClientId: '//YOUR AUTH ID',
         behavior: 'web',
-        iosClientId: //YOUR IOS KEY,
+        iosClientId: '//YOUR AUTH ID',
         scopes: ['profile', 'email']
       });
 

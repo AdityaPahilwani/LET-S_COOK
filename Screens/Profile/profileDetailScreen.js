@@ -13,10 +13,6 @@ const styles=StyleSheet.create({
     
 });
 
-ProfileDetailScreen.navigationOptions=(navigationData)=>{
-    return{
-       headerTransparent: 'true',
-    };
-}
+
 
 export default ProfileDetailScreen;
