@@ -1,5 +1,5 @@
 # Recipe-app
-this app is currently in works
+COMPLETED
 
 
 1) PLEASE CHANGE GOOGLE-SERVICE-INFO.plist with your own file
